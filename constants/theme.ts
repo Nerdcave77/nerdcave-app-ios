@@ -2,7 +2,7 @@
 export const COLORS = {
   background: '#818284', // light gray app background
   card: '#0a2450', // navy cards
-  cardDeep: '#03163c',
+  cardDeep: '#020d24',
   yellow: '#ffd60a', // accent
   ink: '#17203a', // dark text on gray
   articleBg: '#eceff3', // article body surface

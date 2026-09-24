@@ -32,3 +32,50 @@ export function timeAgo(iso: string): string {
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
   return `${Math.floor(s / 86400)}d ago`;
 }
+
+export interface Drop {
+  id: string;
+  name: string;
+  type: 'physical' | 'digital';
+  brand: string;
+  date: string; // ISO
+  timeLabel?: string;
+  url?: string;
+  status: 'confirmed' | 'rumor' | 'watch';
+}
+
+export async function getDrops(): Promise<Drop[]> {
+  const res = await fetch(`${API_BASE_URL}/drops`);
+  if (!res.ok) throw new Error(`drops-${res.status}`);
+  const json = await res.json();
+  const drops: Drop[] = json.drops ?? [];
+  return drops.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+}
+
+/** Human countdown label, e.g. "in 3d 4h", "Tomorrow", "in 45m". Mirrors the web app. */
+export function timeUntil(iso: string): string {
+  const ms = new Date(iso).getTime() - Date.now();
+  if (Number.isNaN(ms)) return '';
+  if (ms <= 0) return 'Happening now';
+  const d = Math.floor(ms / 86400000);
+  const h = Math.floor((ms % 86400000) / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  if (d >= 2) return `in ${d} days`;
+  if (d === 1) return `Tomorrow${h > 0 ? `, in ${24 + h}h` : ''}`;
+  if (h > 0) return `in ${h}h ${m}m`;
+  return `in ${m}m`;
+}
+
+export function formatDropDate(iso: string, timeLabel?: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(+d)) return timeLabel ?? '';
+  const date = d.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'America/New_York',
+  });
+  return timeLabel ? `${date} · ${timeLabel}` : date;
+}

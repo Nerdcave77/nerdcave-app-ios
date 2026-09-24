@@ -7,7 +7,7 @@ function TabIcon({
   name,
   color,
 }: {
-  name: 'newspaper' | 'bookmark' | 'bag' | 'gearshape';
+  name: 'newspaper' | 'bookmark' | 'bag' | 'gearshape' | 'calendar';
   color: ColorValue;
 }) {
   return <SymbolView name={name} tintColor={color} size={26} />;
@@ -32,10 +32,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="saved"
+        name="drops"
         options={{
-          title: 'Saved',
-          tabBarIcon: ({ color }) => <TabIcon name="bookmark" color={color} />,
+          title: 'Drops',
+          tabBarIcon: ({ color }) => <TabIcon name="calendar" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -43,6 +43,13 @@ export default function TabLayout() {
         options={{
           title: 'Market',
           tabBarIcon: ({ color }) => <TabIcon name="bag" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="saved"
+        options={{
+          title: 'Saved',
+          tabBarIcon: ({ color }) => <TabIcon name="bookmark" color={color} />,
         }}
       />
       <Tabs.Screen
