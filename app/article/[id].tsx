@@ -24,6 +24,8 @@ function wrapHtml(contentHtml: string): string {
 <style>
 body { background:#eceff3; color:#17203a; font-family:-apple-system,Helvetica,Arial,sans-serif; font-size:17px; line-height:1.75; padding:20px 18px; margin:0; }
 * { background:transparent !important; background-color:transparent !important; }
+body { background:#eceff3 !important; background-color:#eceff3 !important; }
+#web-header { display:none !important; }
 p,div,span,li,h1,h2,h3 { color:#17203a !important; }
 img { max-width:100%; height:auto; border-radius:12px; margin:18px auto; display:block; }
 a { color:#1d4ed8; }
@@ -152,18 +154,20 @@ export default function ArticleScreen() {
               <Text style={styles.subtitle}>{article.subtitle}</Text>
             )}
           </View>
-          <WebView
-            originWhitelist={['*']}
-            source={{ html: wrapHtml(article.content_html) }}
-            injectedJavaScript={INJECTED_JS}
-            onMessage={(event) => {
-              const h = parseInt(event.nativeEvent.data, 10);
-              if (!Number.isNaN(h) && h > 0) setWebViewHeight(h);
-            }}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}
-            style={[styles.webview, { height: webViewHeight }]}
-          />
+          <View style={styles.bodyCard}>
+            <WebView
+              originWhitelist={['*']}
+              source={{ html: wrapHtml(article.content_html) }}
+              injectedJavaScript={INJECTED_JS}
+              onMessage={(event) => {
+                const h = parseInt(event.nativeEvent.data, 10);
+                if (!Number.isNaN(h) && h > 0) setWebViewHeight(h);
+              }}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+              style={[styles.webview, { height: webViewHeight }]}
+            />
+          </View>
         </ScrollView>
       )}
     </SafeAreaView>
@@ -244,5 +248,12 @@ const styles = StyleSheet.create({
   webview: {
     backgroundColor: 'transparent',
     marginTop: 8,
+  },
+  bodyCard: {
+    backgroundColor: COLORS.articleBg,
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginTop: 8,
+    overflow: 'hidden',
   },
 });
