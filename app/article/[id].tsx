@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
   Image,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,8 +15,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { WebView } from 'react-native-webview';
 import { COLORS } from '@/constants/theme';
-import { getArticle, timeAgo, type Article } from '@/lib/api';
+import { getArticle, type Article } from '@/lib/api';
 import { isSaved, saveArticle, unsaveArticle } from '@/lib/saved';
+
+const SCREEN_W = Dimensions.get('window').width;
+const THUMB_W = SCREEN_W - 32;
 
 function wrapHtml(contentHtml: string): string {
   return `<!DOCTYPE html>
@@ -22,9 +27,8 @@ function wrapHtml(contentHtml: string): string {
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body { background:#eceff3; color:#17203a; font-family:-apple-system,Helvetica,Arial,sans-serif; font-size:17px; line-height:1.75; padding:20px 18px; margin:0; }
+body { color:#17203a; font-family:-apple-system,Helvetica,Arial,sans-serif; font-size:17px; line-height:1.75; margin:0; padding:0; }
 * { background:transparent !important; background-color:transparent !important; }
-body { background:#eceff3 !important; background-color:#eceff3 !important; }
 #web-header { display:none !important; }
 p,div,span,li,h1,h2,h3 { color:#17203a !important; }
 img { max-width:100%; height:auto; border-radius:12px; margin:18px auto; display:block; }
@@ -52,6 +56,51 @@ const INJECTED_JS = `
 })();
 true;
 `;
+
+function extractByline(html: string): {
+  avatarUrl?: string;
+  authorName?: string;
+} {
+  const avatar = html.match(/alt='Author'[^>]*?src='([^']+)'/);
+  const name = html.match(/beehiiv\.com\/authors\/[^"']+["'][^>]*>([^<]+)</);
+  return {
+    avatarUrl: avatar?.[1],
+    authorName: name?.[1]?.trim(),
+  };
+}
+
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function shareTargets(article: Article): { label: string; url: string }[] {
+  const url = encodeURIComponent(article.web_url);
+  const text = encodeURIComponent(article.title);
+  return [
+    {
+      label: 'f',
+      url: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+    },
+    {
+      label: 'X',
+      url: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+    },
+    {
+      label: '@',
+      url: `https://www.threads.net/intent/post?text=${text}%20${url}`,
+    },
+    {
+      label: 'in',
+      url: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+    },
+  ];
+}
 
 export default function ArticleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -85,6 +134,11 @@ export default function ArticleScreen() {
     };
   }, [id]);
 
+  const byline = useMemo(
+    () => extractByline(article?.content_html ?? ''),
+    [article]
+  );
+
   const toggleSave = useCallback(async () => {
     if (!article) return;
     if (saved) {
@@ -108,7 +162,7 @@ export default function ArticleScreen() {
           onPress={() => router.back()}
           accessibilityLabel="Back"
         >
-          <SymbolView name="chevron.left" tintColor={COLORS.ink} size={24} />
+          <SymbolView name="chevron.left" tintColor="#ffffff" size={24} />
         </Pressable>
         {article && (
           <Pressable
@@ -118,7 +172,7 @@ export default function ArticleScreen() {
           >
             <SymbolView
               name={saved ? 'bookmark.fill' : 'bookmark'}
-              tintColor={saved ? COLORS.yellow : COLORS.ink}
+              tintColor={saved ? COLORS.yellow : '#ffffff'}
               size={24}
             />
           </Pressable>
@@ -139,7 +193,10 @@ export default function ArticleScreen() {
           </Pressable>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scroll}>
+        <ScrollView
+          style={styles.body}
+          contentContainerStyle={styles.scroll}
+        >
           {!!article.thumbnail_url && (
             <Image
               source={{ uri: article.thumbnail_url }}
@@ -147,14 +204,41 @@ export default function ArticleScreen() {
               resizeMode="cover"
             />
           )}
-          <View style={styles.header}>
-            <Text style={styles.kicker}>{timeAgo(article.publish_date)}</Text>
+          <View style={styles.card}>
             <Text style={styles.title}>{article.title}</Text>
             {!!article.subtitle && (
               <Text style={styles.subtitle}>{article.subtitle}</Text>
             )}
-          </View>
-          <View style={styles.bodyCard}>
+            <View style={styles.authorRow}>
+              {!!byline.avatarUrl && (
+                <Image
+                  source={{ uri: byline.avatarUrl }}
+                  style={styles.avatar}
+                />
+              )}
+              <View>
+                <Text style={styles.authorName}>
+                  {byline.authorName || 'Ceelow G'}
+                </Text>
+                {!!article.publish_date && (
+                  <Text style={styles.date}>
+                    {formatDate(article.publish_date)}
+                  </Text>
+                )}
+              </View>
+            </View>
+            <View style={styles.shareRow}>
+              {shareTargets(article).map((s) => (
+                <Pressable
+                  key={s.label}
+                  style={styles.shareButton}
+                  accessibilityLabel={`Share via ${s.label}`}
+                  onPress={() => Linking.openURL(s.url)}
+                >
+                  <Text style={styles.shareLabel}>{s.label}</Text>
+                </Pressable>
+              ))}
+            </View>
             <WebView
               originWhitelist={['*']}
               source={{ html: wrapHtml(article.content_html) }}
@@ -177,7 +261,7 @@ export default function ArticleScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.cardDeep,
   },
   topBar: {
     flexDirection: 'row',
@@ -185,15 +269,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 4,
+    backgroundColor: COLORS.cardDeep,
   },
   iconButton: {
     padding: 10,
+  },
+  body: {
+    flex: 1,
+    backgroundColor: COLORS.background,
   },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
+    backgroundColor: COLORS.background,
   },
   errorText: {
     color: COLORS.ink,
@@ -216,44 +306,73 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   thumbnail: {
-    width: '100%',
-    aspectRatio: 16 / 9,
+    width: THUMB_W,
+    height: (THUMB_W * 9) / 16,
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 16,
   },
-  header: {
-    paddingHorizontal: 18,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  kicker: {
-    color: COLORS.yellow,
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 8,
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 20,
   },
   title: {
     color: COLORS.ink,
-    fontSize: 24,
-    fontWeight: '900',
-    lineHeight: 30,
-    marginBottom: 8,
+    fontSize: 27,
+    fontWeight: '800',
+    lineHeight: 34,
+    marginBottom: 12,
   },
   subtitle: {
+    color: COLORS.mutedDark,
+    fontSize: 17,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: 12,
+  },
+  authorName: {
     color: COLORS.ink,
-    opacity: 0.7,
     fontSize: 16,
-    lineHeight: 22,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  date: {
+    color: COLORS.mutedDark,
+    fontSize: 14,
+    marginTop: 2,
+  },
+  shareRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  shareButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#eef1f5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  shareLabel: {
+    color: COLORS.mutedDark,
+    fontSize: 17,
+    fontWeight: '700',
   },
   webview: {
     backgroundColor: 'transparent',
-    marginTop: 8,
-  },
-  bodyCard: {
-    backgroundColor: COLORS.articleBg,
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginTop: 8,
-    overflow: 'hidden',
   },
 });
