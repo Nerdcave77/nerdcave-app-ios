@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -72,12 +73,18 @@ export default function FeedScreen() {
         }
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.brand}>
-              Nerdcave<Text style={styles.brandAccent}>77</Text>
-            </Text>
-            <Text style={styles.tagline}>
-              Digital &amp; physical collectibles news
-            </Text>
+            <Image
+              source={require('@/assets/images/logo.png')}
+              style={styles.logo}
+            />
+            <View>
+              <Text style={styles.brand}>
+                Nerdcave<Text style={styles.brandAccent}>77</Text>
+              </Text>
+              <Text style={styles.tagline}>
+                Digital &amp; physical collectibles news
+              </Text>
+            </View>
           </View>
         }
         ListEmptyComponent={
@@ -110,8 +117,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingTop: 12,
     paddingBottom: 16,
+  },
+  logo: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    marginRight: 12,
   },
   brand: {
     fontSize: 30,
