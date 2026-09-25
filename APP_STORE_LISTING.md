@@ -48,6 +48,6 @@ Suggested shot list:
 > Nerdcave77 is a news reader for our collectibles publication. Articles load from our own CMS API (app.nerdcave77.io/api). Push notifications are article alerts and drop reminders via OneSignal; the user opts in from Settings. No login, no purchases, no user-generated content. The Market tab previews our upcoming marketplace discovery feature — the app is fully functional without it.
 
 ## Version info
-- Version 1.0.0, build 1
-- Bundle ID: io.nerdcave77.app
+- Version 1.0.0, build 13
+- Bundle ID: io.nerdcave77.reader
 - OneSignal plugin mode must be **production** for the submitted build

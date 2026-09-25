@@ -19,12 +19,13 @@ import {
 } from '@/lib/api';
 import DropRemindButton from '@/components/DropRemindButton';
 
-type Filter = 'all' | 'physical' | 'digital';
+type Filter = 'all' | 'physical' | 'digital' | 'comics';
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'physical', label: 'Physical' },
   { key: 'digital', label: 'Digital' },
+  { key: 'comics', label: 'Comics' },
 ];
 
 function StatusBadge({ status }: { status: Drop['status'] }) {
@@ -52,7 +53,7 @@ function DropCard({ drop }: { drop: Drop }) {
             {drop.name} <StatusBadge status={drop.status} />
           </Text>
           <Text style={styles.meta}>
-            {drop.brand} · {drop.type === 'physical' ? 'Physical cards' : 'Digital collectible'}
+            {drop.brand} · {drop.type === 'physical' ? 'Physical cards' : drop.type === 'comics' ? 'Comics' : 'Digital collectible'}
           </Text>
         </View>
         <View style={styles.countdown}>
@@ -129,7 +130,7 @@ export default function DropsScreen() {
           <View>
             <Text style={styles.heading}>Drop Calendar</Text>
             <Text style={styles.subheading}>
-              Upcoming physical card sets &amp; digital collectible drops. Never miss one.
+              Upcoming physical card sets, comics &amp; digital collectible drops. Never miss one.
             </Text>
             <View style={styles.filters}>
               {FILTERS.map((f) => (

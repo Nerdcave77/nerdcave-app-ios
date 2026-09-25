@@ -36,7 +36,7 @@ export function timeAgo(iso: string): string {
 export interface Drop {
   id: string;
   name: string;
-  type: 'physical' | 'digital';
+  type: 'physical' | 'digital' | 'comics';
   brand: string;
   date: string; // ISO
   timeLabel?: string;
