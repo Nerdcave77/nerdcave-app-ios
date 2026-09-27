@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 import { OneSignal } from 'react-native-onesignal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS } from '@/constants/theme';
+import { API_BASE_URL, COLORS } from '@/constants/theme';
 import { isPushOptedIn, requestPushPermission } from '@/lib/onesignal';
 
 type State = 'idle' | 'working' | 'done' | 'unsupported';
@@ -11,14 +11,12 @@ const STORE_KEY = 'nerdcave77:drop-reminders';
 
 /**
  * Reminder state is stored locally (AsyncStorage) as the source of truth for
- * the button UI, and mirrored to a OneSignal `drop_<id>` tag so the scheduled
- * server job can target reminder pushes.
+ * the button UI, and registered server-side (keyed by the OneSignal push
+ * subscription ID) so the scheduled reminder job can target this device.
  *
- * Local-first because OneSignal's getTags() can come back empty on a cold
- * start before the SDK finishes restoring the user — which made the button
- * "forget" reminders after the app was closed. On mount we also reconcile:
- * adopt tags found on the OneSignal user but missing locally (e.g. set from
- * the web app), and re-push local reminders whose tag never reached OneSignal.
+ * Server-side registration exists because client-side OneSignal tags proved
+ * unreliable: tags set from this app never synced to OneSignal's backend, so
+ * tag-targeted reminder pushes never arrived.
  */
 async function readLocal(): Promise<Record<string, boolean>> {
   try {
@@ -37,9 +35,29 @@ async function writeLocal(map: Record<string, boolean>): Promise<void> {
   }
 }
 
+async function getPlayerId(): Promise<string | null> {
+  try {
+    return await OneSignal.User.pushSubscription.getIdAsync();
+  } catch {
+    return null;
+  }
+}
+
+async function registerServer(dropId: string, playerId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/drops/reminders/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dropId, playerId }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export default function DropRemindButton({ dropId }: { dropId: string }) {
   const [state, setState] = useState<State>('idle');
-  const tagKey = `drop_${dropId}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -49,29 +67,28 @@ export default function DropRemindButton({ dropId }: { dropId: string }) {
       if (!cancelled && local[dropId]) {
         setState('done');
       }
-      // 2. Reconcile with OneSignal in the background. The SDK can need a
-      // moment on cold start, so retry once after a short delay.
-      for (let attempt = 0; attempt < 2 && !cancelled; attempt++) {
+      // 2. Self-heal: if the button thinks a reminder is on but the server
+      // has no registration (e.g. the POST failed), re-register now.
+      if (local[dropId]) {
         try {
-          const tags = await OneSignal.User.getTags();
-          const hasTag = !!(tags && tags[tagKey]);
-          if (hasTag && !local[dropId]) {
-            const next = { ...local, [dropId]: true };
-            await writeLocal(next);
-            if (!cancelled) setState('done');
-          } else if (!hasTag && local[dropId]) {
-            OneSignal.User.addTag(tagKey, '1');
+          const playerId = await getPlayerId();
+          if (!playerId || cancelled) return;
+          const res = await fetch(
+            `${API_BASE_URL}/drops/reminders/status?dropId=${encodeURIComponent(dropId)}&playerId=${encodeURIComponent(playerId)}`
+          );
+          const body = (await res.json()) as { registered?: boolean };
+          if (!cancelled && res.ok && body.registered === false) {
+            await registerServer(dropId, playerId);
           }
-          break;
         } catch {
-          if (attempt === 0) await new Promise((r) => setTimeout(r, 2500));
+          // Best-effort; a later launch retries.
         }
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [dropId, tagKey]);
+  }, [dropId]);
 
   const remind = async () => {
     setState('working');
@@ -83,17 +100,17 @@ export default function DropRemindButton({ dropId }: { dropId: string }) {
           return;
         }
       }
-      // Local first so the UI never lies, then mirror to OneSignal.
+      const playerId = await getPlayerId();
+      // Local first so the UI never lies.
       const local = await readLocal();
       await writeLocal({ ...local, [dropId]: true });
-      OneSignal.User.addTag(tagKey, '1');
-      // Verify the tag landed; retry once if the SDK swallowed it.
-      await new Promise((r) => setTimeout(r, 1500));
-      try {
-        const tags = await OneSignal.User.getTags();
-        if (!(tags && tags[tagKey])) OneSignal.User.addTag(tagKey, '1');
-      } catch {
-        // Verification is best-effort; the mount reconciliation heals it later.
+      if (playerId) {
+        // The server registration is what the scheduled job targets.
+        const ok = await registerServer(dropId, playerId);
+        if (!ok) {
+          // Retry once; the mount self-heal covers anything still missing.
+          await registerServer(dropId, playerId);
+        }
       }
       setState('done');
     } catch {
