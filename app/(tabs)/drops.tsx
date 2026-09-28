@@ -23,7 +23,7 @@ type Filter = 'all' | 'physical' | 'digital' | 'comics';
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'All' },
-  { key: 'physical', label: 'Physical' },
+  { key: 'physical', label: 'Trading Cards' },
   { key: 'digital', label: 'Digital' },
   { key: 'comics', label: 'Comics' },
 ];
@@ -53,7 +53,7 @@ function DropCard({ drop }: { drop: Drop }) {
             {drop.name} <StatusBadge status={drop.status} />
           </Text>
           <Text style={styles.meta}>
-            {drop.brand} · {drop.type === 'physical' ? 'Physical cards' : drop.type === 'comics' ? 'Comics' : 'Digital collectible'}
+            {drop.brand} · {drop.type === 'physical' ? 'Trading cards' : drop.type === 'comics' ? 'Comics' : 'Digital collectible'}
           </Text>
         </View>
         <View style={styles.countdown}>
