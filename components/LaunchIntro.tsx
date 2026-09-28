@@ -180,9 +180,9 @@ export default function LaunchIntro({ onDone }: { onDone: () => void }) {
         style={[
           {
             position: 'absolute',
-            left: cx - 130,
+            left: cx - 170,
             top: cy - 72,
-            width: 260,
+            width: 340,
             height: 144,
             alignItems: 'center',
             justifyContent: 'center',
@@ -190,7 +190,7 @@ export default function LaunchIntro({ onDone }: { onDone: () => void }) {
           powStyle,
         ]}
       >
-        <Text style={styles.pow}>POW!</Text>
+        <Text style={styles.pow}>PEW PEW!</Text>
       </Animated.View>
     </AnimatedPressable>
   );
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     zIndex: 50,
   },
   pow: {
-    fontSize: 72,
+    fontSize: 64,
     fontWeight: '900',
     fontStyle: 'italic',
     color: '#ffffff',
