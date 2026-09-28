@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import {
@@ -6,6 +6,7 @@ import {
   type NotificationClickEvent,
 } from 'react-native-onesignal';
 import { initOneSignal } from '@/lib/onesignal';
+import LaunchIntro from '@/components/LaunchIntro';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -13,9 +14,16 @@ export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
+SplashScreen.setOptions({ duration: 250, fade: true });
 SplashScreen.preventAutoHideAsync();
 
+// Cold-start only: the comic-burst intro plays once per app launch,
+// never on Fast Refresh or foregrounding.
+let introPlayed = false;
+
 export default function RootLayout() {
+  const [showIntro, setShowIntro] = useState(() => !introPlayed);
+
   useEffect(() => {
     initOneSignal();
 
@@ -32,19 +40,33 @@ export default function RootLayout() {
     };
     OneSignal.Notifications.addEventListener('click', onNotificationClick);
 
-    SplashScreen.hideAsync();
     return () => {
       OneSignal.Notifications.removeEventListener('click', onNotificationClick);
     };
   }, []);
 
+  // Safety net: if the intro never renders, don't trap the native splash.
+  useEffect(() => {
+    if (!showIntro) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [showIntro]);
+
+  const handleIntroDone = useCallback(() => {
+    introPlayed = true;
+    setShowIntro(false);
+  }, []);
+
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="article/[id]"
-        options={{ headerShown: false, presentation: 'card' }}
-      />
-    </Stack>
+    <>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="article/[id]"
+          options={{ headerShown: false, presentation: 'card' }}
+        />
+      </Stack>
+      {showIntro && <LaunchIntro onDone={handleIntroDone} />}
+    </>
   );
 }
