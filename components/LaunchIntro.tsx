@@ -242,7 +242,7 @@ export default function LaunchIntro({ onDone }: { onDone: () => void }) {
       >
         <Text style={styles.wordmark}>NERDCAVE77</Text>
       </Animated.View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
