@@ -26,6 +26,8 @@ const SPIKES = 16;
 const RINGS = 6;
 const AUTO_DISMISS_MS = 1800;
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 // One ring of the halftone dot field. Rings fade in one after another,
 // radiating outward from the burst.
 function DotRing({
@@ -182,7 +184,7 @@ export default function LaunchIntro({ onDone }: { onDone: () => void }) {
   }));
 
   return (
-    <Pressable onPress={finish} style={[styles.overlay, overlayStyle]}>
+    <AnimatedPressable onPress={finish} style={[styles.overlay, overlayStyle]}>
       {Array.from({ length: RINGS }, (_, i) => (
         <DotRing key={i} progress={dotsIn} index={i} cx={cx} cy={cy} />
       ))}
