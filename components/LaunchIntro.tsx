@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
 import {
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -24,7 +23,7 @@ import { COLORS } from '@/constants/theme';
 
 const SPIKES = 16;
 const RINGS = 6;
-const AUTO_DISMISS_MS = 1800;
+const AUTO_DISMISS_MS = 1400;
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -128,7 +127,7 @@ function Burst({ scale, cx, cy }: { scale: SharedValue<number>; cx: number; cy: 
 export default function LaunchIntro({ onDone }: { onDone: () => void }) {
   const { width, height } = useWindowDimensions();
   const cx = width / 2;
-  const cy = height * 0.4;
+  const cy = height * 0.46;
   const finished = useRef(false);
 
   const overlayOpacity = useSharedValue(1);
@@ -136,9 +135,6 @@ export default function LaunchIntro({ onDone }: { onDone: () => void }) {
   const burstScale = useSharedValue(0);
   const dotsIn = useSharedValue(0);
   const powScale = useSharedValue(0);
-  const mascotScale = useSharedValue(0);
-  const wordOpacity = useSharedValue(0);
-  const wordY = useSharedValue(18);
 
   const finish = () => {
     if (finished.current) return;
@@ -159,9 +155,6 @@ export default function LaunchIntro({ onDone }: { onDone: () => void }) {
     burstScale.value = withDelay(80, withSpring(1, { damping: 7, stiffness: 110 }));
     dotsIn.value = withDelay(140, withTiming(1, { duration: 950 }));
     powScale.value = withDelay(330, withSpring(1, { damping: 6, stiffness: 140 }));
-    mascotScale.value = withDelay(540, withSpring(1, { damping: 7.5, stiffness: 105 }));
-    wordOpacity.value = withDelay(820, withTiming(1, { duration: 350 }));
-    wordY.value = withDelay(820, withTiming(0, { duration: 380, easing: Easing.out(Easing.cubic) }));
 
     const t = setTimeout(finish, AUTO_DISMISS_MS);
     return () => clearTimeout(t);
@@ -174,13 +167,6 @@ export default function LaunchIntro({ onDone }: { onDone: () => void }) {
   }));
   const powStyle = useAnimatedStyle(() => ({
     transform: [{ scale: Math.max(powScale.value, 0.001) }, { rotate: '-8deg' }],
-  }));
-  const mascotStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: Math.max(mascotScale.value, 0.001) }],
-  }));
-  const wordStyle = useAnimatedStyle(() => ({
-    opacity: wordOpacity.value,
-    transform: [{ translateY: wordY.value }],
   }));
 
   return (
@@ -206,42 +192,6 @@ export default function LaunchIntro({ onDone }: { onDone: () => void }) {
       >
         <Text style={styles.pow}>POW!</Text>
       </Animated.View>
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          {
-            position: 'absolute',
-            left: cx - 80,
-            top: cy + 150,
-            width: 160,
-            height: 160,
-            alignItems: 'center',
-            justifyContent: 'center',
-          },
-          mascotStyle,
-        ]}
-      >
-        <Image
-          source={require('@/assets/images/logo.png')}
-          style={{ width: 148, height: 148 }}
-          resizeMode="contain"
-        />
-      </Animated.View>
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: cy + 322,
-            alignItems: 'center',
-          },
-          wordStyle,
-        ]}
-      >
-        <Text style={styles.wordmark}>NERDCAVE77</Text>
-      </Animated.View>
     </AnimatedPressable>
   );
 }
@@ -257,7 +207,7 @@ const styles = StyleSheet.create({
     zIndex: 50,
   },
   pow: {
-    fontSize: 66,
+    fontSize: 72,
     fontWeight: '900',
     fontStyle: 'italic',
     color: '#ffffff',
@@ -265,11 +215,5 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.4)',
     textShadowOffset: { width: 4, height: 4 },
     textShadowRadius: 0,
-  },
-  wordmark: {
-    color: COLORS.yellow,
-    fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: 6,
   },
 });
