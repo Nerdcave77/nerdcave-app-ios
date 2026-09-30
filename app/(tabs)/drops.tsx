@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { COLORS } from '@/constants/theme';
 import {
@@ -42,8 +43,12 @@ function DropCard({ drop }: { drop: Drop }) {
     if (drop.url) WebBrowser.openBrowserAsync(drop.url);
   }, [drop.url]);
 
+  const openDrop = useCallback(() => {
+    router.push(`/drop/${encodeURIComponent(drop.id)}`);
+  }, [drop.id]);
+
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={openDrop}>
       <View style={styles.cardTop}>
         <View style={styles.cardMain}>
           <Text style={styles.date}>
@@ -68,7 +73,7 @@ function DropCard({ drop }: { drop: Drop }) {
           </Pressable>
         )}
       </View>
-    </View>
+    </Pressable>
   );
 }
 

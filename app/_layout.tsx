@@ -27,15 +27,21 @@ export default function RootLayout() {
   useEffect(() => {
     initOneSignal();
 
-    // Tapping a push opens the article it points at.
+    // Tapping a push opens what it points at.
     // Webhook sets data.postId and url https://app.nerdcave77.io/article/<id>.
+    // Drop reminders set data.dropId.
     const onNotificationClick = (event: NotificationClickEvent) => {
       const data = event.notification.additionalData as
-        | { postId?: string }
+        | { postId?: string; dropId?: string }
         | undefined;
       const postId = data?.postId;
       if (postId) {
         router.push(`/article/${encodeURIComponent(postId)}`);
+        return;
+      }
+      const dropId = data?.dropId;
+      if (dropId) {
+        router.push(`/drop/${encodeURIComponent(dropId)}`);
       }
     };
     OneSignal.Notifications.addEventListener('click', onNotificationClick);
@@ -63,6 +69,10 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="article/[id]"
+          options={{ headerShown: false, presentation: 'card' }}
+        />
+        <Stack.Screen
+          name="drop/[id]"
           options={{ headerShown: false, presentation: 'card' }}
         />
       </Stack>
