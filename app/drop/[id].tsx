@@ -18,6 +18,7 @@ import {
   timeUntil,
   type Drop,
 } from '@/lib/api';
+import { dropDestination } from '@/lib/brands';
 import DropRemindButton from '@/components/DropRemindButton';
 
 function typeLabel(type: Drop['type']): string {
@@ -65,7 +66,14 @@ export default function DropDetailScreen() {
     };
   }, [id]);
 
-  const openDetails = useCallback(() => {
+  const destination = drop ? dropDestination(drop) : null;
+  const showAnnouncement = !!drop?.url && drop.url !== destination;
+
+  const openDestination = useCallback(() => {
+    if (destination) WebBrowser.openBrowserAsync(destination);
+  }, [destination]);
+
+  const openAnnouncement = useCallback(() => {
     if (drop?.url) WebBrowser.openBrowserAsync(drop.url);
   }, [drop?.url]);
 
@@ -122,12 +130,17 @@ export default function DropDetailScreen() {
             </View>
             <View style={styles.actions}>
               <DropRemindButton dropId={drop.id} />
-              {!!drop.url && (
-                <Pressable onPress={openDetails} style={styles.detailsButton}>
-                  <Text style={styles.detailsText}>View drop</Text>
+              {!!destination && (
+                <Pressable onPress={openDestination} style={styles.detailsButton}>
+                  <Text style={styles.detailsText}>Go to drop</Text>
                 </Pressable>
               )}
             </View>
+            {showAnnouncement && (
+              <Pressable onPress={openAnnouncement} style={styles.announcement}>
+                <Text style={styles.announcementText}>Read announcement</Text>
+              </Pressable>
+            )}
           </View>
         </ScrollView>
       )}
@@ -258,5 +271,16 @@ const styles = StyleSheet.create({
     color: COLORS.cardDeep,
     fontSize: 15,
     fontWeight: '800',
+  },
+  announcement: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+  },
+  announcementText: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 13,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });

@@ -18,6 +18,7 @@ import {
   timeUntil,
   type Drop,
 } from '@/lib/api';
+import { dropDestination } from '@/lib/brands';
 import DropRemindButton from '@/components/DropRemindButton';
 
 type Filter = 'all' | 'physical' | 'digital' | 'comics';
@@ -39,9 +40,11 @@ function StatusBadge({ status }: { status: Drop['status'] }) {
 }
 
 function DropCard({ drop }: { drop: Drop }) {
-  const openDetails = useCallback(() => {
-    if (drop.url) WebBrowser.openBrowserAsync(drop.url);
-  }, [drop.url]);
+  const destination = dropDestination(drop);
+
+  const openDestination = useCallback(() => {
+    if (destination) WebBrowser.openBrowserAsync(destination);
+  }, [destination]);
 
   const openDrop = useCallback(() => {
     router.push(`/drop/${encodeURIComponent(drop.id)}`);
@@ -67,9 +70,9 @@ function DropCard({ drop }: { drop: Drop }) {
       </View>
       <View style={styles.cardActions}>
         <DropRemindButton dropId={drop.id} />
-        {!!drop.url && (
-          <Pressable onPress={openDetails} style={styles.details}>
-            <Text style={styles.detailsText}>Details</Text>
+        {!!destination && (
+          <Pressable onPress={openDestination} style={styles.details}>
+            <Text style={styles.detailsText}>Go to drop</Text>
           </Pressable>
         )}
       </View>
