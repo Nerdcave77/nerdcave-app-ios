@@ -7,7 +7,7 @@ function TabIcon({
   name,
   color,
 }: {
-  name: 'newspaper' | 'bookmark' | 'bag' | 'gearshape' | 'calendar';
+  name: 'newspaper' | 'bookmark' | 'chart.line.uptrend.xyaxis' | 'gearshape' | 'calendar';
   color: ColorValue;
 }) {
   return <SymbolView name={name} tintColor={color} size={26} />;
@@ -42,7 +42,7 @@ export default function TabLayout() {
         name="marketplace"
         options={{
           title: 'Market',
-          tabBarIcon: ({ color }) => <TabIcon name="bag" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="chart.line.uptrend.xyaxis" color={color} />,
         }}
       />
       <Tabs.Screen

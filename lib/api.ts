@@ -54,6 +54,57 @@ export async function getDrops(): Promise<Drop[]> {
   );
 }
 
+export type MarketCategory = 'comics' | 'sports-cards' | 'trading-cards' | 'digital' | 'overall';
+export type MarketItemType = 'sale' | 'auction-result' | 'price-move' | 'market-news';
+
+export interface MarketNews {
+  id: string;
+  headline: string;
+  category: MarketCategory;
+  type: MarketItemType;
+  price: string; // display string exactly as reported, or "Unconfirmed"
+  eventDate: string; // yyyy-mm-dd
+  summary: string;
+  url?: string;
+  sales?: string; // total sold/transactions as reported (performance items)
+  change?: string; // e.g. "+18% (30 days)"
+  signal?: string; // e.g. "2nd Printing", "Heating Up"
+  publishedAt: string; // ISO
+}
+
+export async function getMarketNews(): Promise<MarketNews[]> {
+  const res = await fetch(`${API_BASE_URL}/market-news`);
+  if (!res.ok) throw new Error(`market-news-${res.status}`);
+  const json = await res.json();
+  return json.items ?? [];
+}
+
+export const MARKET_CATEGORY_LABELS: Record<MarketCategory, string> = {
+  comics: 'Comics',
+  'sports-cards': 'Sports Cards',
+  'trading-cards': 'Trading Cards',
+  digital: 'Digital',
+  overall: 'Overall Market',
+};
+
+export const MARKET_TYPE_LABELS: Record<MarketItemType, string> = {
+  sale: 'Sale',
+  'auction-result': 'Auction Result',
+  'price-move': 'Price Move',
+  'market-news': 'Market News',
+};
+
+export function formatEventDate(isoDate: string): string {
+  const d = new Date(`${isoDate}T12:00:00`);
+  if (Number.isNaN(+d)) return isoDate;
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'America/New_York',
+  });
+}
+
 /** Human countdown label, e.g. "in 3d 4h", "Tomorrow", "in 45m". Mirrors the web app. */
 export function timeUntil(iso: string): string {
   const ms = new Date(iso).getTime() - Date.now();
