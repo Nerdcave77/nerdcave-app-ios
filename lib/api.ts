@@ -44,14 +44,20 @@ export interface Drop {
   status: 'confirmed' | 'rumor' | 'watch';
 }
 
+export function isTbaDrop(drop: Pick<Drop, 'date' | 'status'>): boolean {
+  return drop.status === 'watch' || drop.date === 'TBA' || drop.date >= '9999';
+}
+
 export async function getDrops(): Promise<Drop[]> {
   const res = await fetch(`${API_BASE_URL}/drops`);
   if (!res.ok) throw new Error(`drops-${res.status}`);
   const json = await res.json();
   const drops: Drop[] = json.drops ?? [];
-  return drops.sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
+  return drops.sort((a, b) => {
+    const aTime = isTbaDrop(a) ? Number.POSITIVE_INFINITY : new Date(a.date).getTime();
+    const bTime = isTbaDrop(b) ? Number.POSITIVE_INFINITY : new Date(b.date).getTime();
+    return aTime - bTime;
+  });
 }
 
 export type MarketCategory = 'comics' | 'sports-cards' | 'trading-cards' | 'digital' | 'overall';
@@ -106,7 +112,8 @@ export function formatEventDate(isoDate: string): string {
 }
 
 /** Human countdown label, e.g. "in 3d 4h", "Tomorrow", "in 45m". Mirrors the web app. */
-export function timeUntil(iso: string): string {
+export function timeUntil(iso: string, status?: Drop['status']): string {
+  if (status === 'watch' || iso === 'TBA' || iso >= '9999') return '';
   const ms = new Date(iso).getTime() - Date.now();
   if (Number.isNaN(ms)) return '';
   if (ms <= 0) return 'Happening now';
@@ -119,7 +126,8 @@ export function timeUntil(iso: string): string {
   return `in ${m}m`;
 }
 
-export function formatDropDate(iso: string, timeLabel?: string): string {
+export function formatDropDate(iso: string, timeLabel?: string, status?: Drop['status']): string {
+  if (status === 'watch' || iso === 'TBA' || iso >= '9999') return 'Date TBA';
   const d = new Date(iso);
   if (Number.isNaN(+d)) return timeLabel ?? '';
   const date = d.toLocaleDateString('en-US', {

@@ -15,6 +15,7 @@ import { COLORS } from '@/constants/theme';
 import {
   formatDropDate,
   getDrops,
+  isTbaDrop,
   timeUntil,
   type Drop,
 } from '@/lib/api';
@@ -115,7 +116,7 @@ export default function DropDetailScreen() {
             <View style={styles.cardTop}>
               <View style={styles.cardMain}>
                 <Text style={styles.date}>
-                  {formatDropDate(drop.date, drop.timeLabel).toUpperCase()}
+                  {formatDropDate(drop.date, drop.timeLabel, drop.status).toUpperCase()}
                 </Text>
                 <Text style={styles.title}>
                   {drop.name} <StatusBadge status={drop.status} />
@@ -124,9 +125,11 @@ export default function DropDetailScreen() {
                   {drop.brand} · {typeLabel(drop.type)}
                 </Text>
               </View>
-              <View style={styles.countdown}>
-                <Text style={styles.countdownText}>{timeUntil(drop.date)}</Text>
-              </View>
+              {!isTbaDrop(drop) && (
+                <View style={styles.countdown}>
+                  <Text style={styles.countdownText}>{timeUntil(drop.date, drop.status)}</Text>
+                </View>
+              )}
             </View>
             <View style={styles.actions}>
               <DropRemindButton dropId={drop.id} />
