@@ -29,10 +29,9 @@ function typeLabel(type: Drop['type']): string {
 }
 
 function StatusBadge({ status }: { status: Drop['status'] }) {
-  if (status === 'confirmed') return null;
   return (
-    <Text style={[styles.badge, status === 'rumor' ? styles.badgeRumor : styles.badgeWatch]}>
-      {status === 'rumor' ? 'RUMOR' : 'DATE TBA'}
+    <Text style={[styles.badge, status === 'confirmed' ? styles.badgeConfirmed : status === 'rumor' ? styles.badgeRumor : styles.badgeWatch]}>
+      {status === 'confirmed' ? 'CONFIRMED' : status === 'rumor' ? 'RUMOR' : 'WATCH'}
     </Text>
   );
 }
@@ -233,6 +232,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     overflow: 'hidden',
+  },
+  badgeConfirmed: {
+    backgroundColor: 'rgba(52,211,153,0.2)',
+    color: '#6ee7b7',
   },
   badgeRumor: {
     backgroundColor: 'rgba(249,115,22,0.2)',
