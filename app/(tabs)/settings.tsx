@@ -68,6 +68,10 @@ export default function SettingsScreen() {
     WebBrowser.openBrowserAsync('https://nerdcave77.io');
   }, []);
 
+  const openSupport = useCallback(() => {
+    WebBrowser.openBrowserAsync('https://app.nerdcave77.io/support');
+  }, []);
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.container}>
@@ -96,6 +100,16 @@ export default function SettingsScreen() {
           </View>
           {!!status && <Text style={styles.status}>{status}</Text>}
         </View>
+
+        <Pressable style={styles.card} onPress={openSupport}>
+          <View style={styles.row}>
+            <View style={styles.rowText}>
+              <Text style={styles.rowTitle}>Support</Text>
+              <Text style={styles.rowSubtitle}>Help with the Nerdcave77 apps</Text>
+            </View>
+            <Text style={styles.chevron}>›</Text>
+          </View>
+        </Pressable>
 
         <Pressable style={styles.card} onPress={openSite}>
           <View style={styles.row}>
