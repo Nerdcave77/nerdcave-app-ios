@@ -1,9 +1,21 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  AppState,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+} from 'react-native';
 import { OneSignal } from 'react-native-onesignal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL, COLORS } from '@/constants/theme';
-import { isPushOptedIn, requestPushPermission } from '@/lib/onesignal';
+import {
+  hasOsPushPermission,
+  isPushOptedIn,
+  requestPushPermission,
+  setPushOptedIn,
+} from '@/lib/onesignal';
 
 type State = 'idle' | 'working' | 'done' | 'unsupported';
 
@@ -59,6 +71,29 @@ async function registerServer(dropId: string, playerId: string): Promise<boolean
 export default function DropRemindButton({ dropId }: { dropId: string }) {
   const [state, setState] = useState<State>('idle');
 
+  // If the user fixes permission in iOS Settings and comes back, unstick
+  // a button that was showing "Enable push in Settings".
+  const refreshAvailability = useCallback(async () => {
+    try {
+      const [osPerm, optedIn] = await Promise.all([
+        hasOsPushPermission(),
+        isPushOptedIn(),
+      ]);
+      if (osPerm && optedIn) {
+        setState((prev) => (prev === 'unsupported' ? 'idle' : prev));
+      }
+    } catch {
+      // Best effort; the tap flow re-checks anyway.
+    }
+  }, []);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'active') refreshAvailability();
+    });
+    return () => sub.remove();
+  }, [refreshAvailability]);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -91,14 +126,28 @@ export default function DropRemindButton({ dropId }: { dropId: string }) {
   }, [dropId]);
 
   const remind = async () => {
+    // The button says "Enable push in Settings" — actually take him there
+    // instead of silently retrying the check that already failed.
+    if (state === 'unsupported') {
+      Linking.openSettings();
+      return;
+    }
     setState('working');
     try {
-      if (!(await isPushOptedIn())) {
+      // OS permission and OneSignal opt-in are two separate gates. Check the
+      // OS first; only prompt when iOS has never asked.
+      if (!(await hasOsPushPermission())) {
         const granted = await requestPushPermission();
         if (!granted) {
           setState('unsupported');
           return;
         }
+      }
+      // iOS allows push but OneSignal is opted out (e.g. the alerts toggle
+      // was off at some point). Tapping "Remind me" is explicit consent, so
+      // opt back in instead of failing the tap.
+      if (!(await isPushOptedIn())) {
+        await setPushOptedIn(true);
       }
       const playerId = await getPlayerId();
       // Local first so the UI never lies.
