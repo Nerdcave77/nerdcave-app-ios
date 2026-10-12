@@ -34,15 +34,6 @@ export async function isPushOptedIn(): Promise<boolean> {
   }
 }
 
-/** OS-level push permission (iOS Settings), independent of the OneSignal opt-in. */
-export async function hasOsPushPermission(): Promise<boolean> {
-  try {
-    return await OneSignal.Notifications.getPermissionAsync();
-  } catch {
-    return false;
-  }
-}
-
 export async function setPushOptedIn(optIn: boolean): Promise<void> {
   if (optIn) {
     OneSignal.User.pushSubscription.optIn();
