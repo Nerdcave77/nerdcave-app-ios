@@ -23,7 +23,7 @@ import { COLORS } from '@/constants/theme';
 
 const SPIKES = 16;
 const RINGS = 6;
-const AUTO_DISMISS_MS = 1400;
+const AUTO_DISMISS_MS = 700;
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
