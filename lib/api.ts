@@ -53,9 +53,14 @@ export async function getDrops(): Promise<Drop[]> {
   if (!res.ok) throw new Error(`drops-${res.status}`);
   const json = await res.json();
   const drops: Drop[] = json.drops ?? [];
+  const now = Date.now();
   return drops.sort((a, b) => {
     const aTime = isTbaDrop(a) ? Number.POSITIVE_INFINITY : new Date(a.date).getTime();
     const bTime = isTbaDrop(b) ? Number.POSITIVE_INFINITY : new Date(b.date).getTime();
+    const aPast = aTime !== Number.POSITIVE_INFINITY && aTime <= now;
+    const bPast = bTime !== Number.POSITIVE_INFINITY && bTime <= now;
+    if (aPast !== bPast) return aPast ? 1 : -1;
+    if (aPast && bPast) return bTime - aTime; // most recent first
     return aTime - bTime;
   });
 }
