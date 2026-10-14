@@ -26,7 +26,7 @@ type Filter = 'all' | 'physical' | 'digital' | 'comics';
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'All' },
-  { key: 'physical', label: 'Trading Cards' },
+  { key: 'physical', label: 'Physical' },
   { key: 'digital', label: 'Digital' },
   { key: 'comics', label: 'Comics' },
 ];
