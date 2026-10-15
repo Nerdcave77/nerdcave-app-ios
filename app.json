@@ -28,7 +28,7 @@
     },
     "name": "Nerdcave77",
     "newArchEnabled": true,
-    "orientation": "portrait",
+    "orientation": "default",
     "plugins": [
       "expo-router",
       [

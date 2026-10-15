@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   Image,
   Linking,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,9 +17,6 @@ import { WebView } from 'react-native-webview';
 import { COLORS } from '@/constants/theme';
 import { getArticle, type Article } from '@/lib/api';
 import { isSaved, saveArticle, unsaveArticle } from '@/lib/saved';
-
-const SCREEN_W = Dimensions.get('window').width;
-const THUMB_W = SCREEN_W - 32;
 
 function wrapHtml(contentHtml: string): string {
   return `<!DOCTYPE html>
@@ -109,6 +106,9 @@ export default function ArticleScreen() {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [webViewHeight, setWebViewHeight] = useState(300);
+  // Live width so folding/rotating while reading re-lays-out the thumbnail.
+  const { width } = useWindowDimensions();
+  const thumbW = width - 32;
 
   useEffect(() => {
     let active = true;
@@ -200,7 +200,7 @@ export default function ArticleScreen() {
           {!!article.thumbnail_url && (
             <Image
               source={{ uri: article.thumbnail_url }}
-              style={styles.thumbnail}
+              style={[styles.thumbnail, { width: thumbW, height: (thumbW * 9) / 16 }]}
               resizeMode="cover"
             />
           )}
@@ -306,8 +306,6 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   thumbnail: {
-    width: THUMB_W,
-    height: (THUMB_W * 9) / 16,
     marginHorizontal: 16,
     marginTop: 12,
     borderRadius: 16,
