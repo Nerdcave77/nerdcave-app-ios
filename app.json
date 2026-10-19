@@ -19,7 +19,7 @@
     },
     "icon": "./assets/images/icon.png",
     "ios": {
-      "buildNumber": "19",
+      "buildNumber": "20",
       "bundleIdentifier": "io.nerdcave77.reader",
       "supportsTablet": true,
       "infoPlist": {
@@ -49,7 +49,7 @@
     "scheme": "nerdcave77",
     "slug": "nerdcave77",
     "userInterfaceStyle": "light",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "web": {
       "bundler": "metro",
       "favicon": "./assets/images/favicon.png",
