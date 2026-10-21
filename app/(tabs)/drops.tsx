@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/constants/theme';
-import { useIsWide } from '@/hooks/useIsWide';
+import { useIsWideLandscape } from '@/hooks/useIsWide';
 import DuoHome from '@/components/DuoHome';
 import DropsList from '@/components/DropsList';
 
 export default function DropsScreen() {
-  const wide = useIsWide();
+  const split = useIsWideLandscape();
 
-  if (wide) {
+  if (split) {
     return <DuoHome initialRight="drops" />;
   }
 

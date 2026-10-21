@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/constants/theme';
-import { useIsWide } from '@/hooks/useIsWide';
+import { useIsWideLandscape } from '@/hooks/useIsWide';
 import DuoHome from '@/components/DuoHome';
 import FeedList from '@/components/FeedList';
 
 export default function FeedScreen() {
-  const wide = useIsWide();
+  const split = useIsWideLandscape();
 
-  if (wide) {
+  if (split) {
     return <DuoHome initialRight="market" />;
   }
 

@@ -12,3 +12,16 @@ export function useIsWide(breakpoint = 600): boolean {
   const { width } = useWindowDimensions();
   return width >= breakpoint;
 }
+
+// Ceelow's Duo layout rules (2026-10-21):
+// - Wide screen upright (portrait): single pane (Feed / the current tab
+//   on its own) with the tab buttons on a right side rail.
+// - Wide screen sideways (landscape): two panes, Feed on the left and
+//   Market/Drops on the right, rail still on the right.
+// - Narrow screens: single pane with the standard bottom bar.
+// So the split (DuoHome) is gated on wide AND landscape, while the rail
+// in the tabs layout is gated on wide alone.
+export function useIsWideLandscape(breakpoint = 600): boolean {
+  const { width, height } = useWindowDimensions();
+  return width >= breakpoint && width > height;
+}
