@@ -2,6 +2,8 @@ import { Tabs } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import type { ColorValue } from 'react-native';
 import { COLORS } from '@/constants/theme';
+import { useIsWide } from '@/hooks/useIsWide';
+import AppTabBar from '@/components/AppTabBar';
 
 function TabIcon({
   name,
@@ -14,10 +16,17 @@ function TabIcon({
 }
 
 export default function TabLayout() {
+  const wide = useIsWide();
+
   return (
     <Tabs
+      tabBar={(props) => <AppTabBar {...props} />}
       screenOptions={{
         headerShown: false,
+        // Wide screens (unfolded Duo, iPad): the tab buttons live on the
+        // right side as a vertical rail. Narrow screens keep the
+        // standard bottom bar.
+        tabBarPosition: wide ? 'right' : 'bottom',
         tabBarActiveTintColor: COLORS.yellow,
         tabBarInactiveTintColor: 'rgba(255,255,255,0.55)',
         tabBarStyle: { backgroundColor: COLORS.cardDeep },
