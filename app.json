@@ -15,8 +15,12 @@
     },
     "extra": {
       "apiBaseUrl": "https://app.nerdcave77.io/api",
-      "onesignalAppId": "549e1539-3bd4-49b4-bdfa-748f09c4490c"
+      "onesignalAppId": "549e1539-3bd4-49b4-bdfa-748f09c4490c",
+      "eas": {
+        "projectId": "2b90f556-0613-46e3-83d0-3bc8ae9edcde"
+      }
     },
+    "owner": "nerdcave77",
     "icon": "./assets/images/icon.png",
     "ios": {
       "buildNumber": "21",
