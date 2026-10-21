@@ -1,17 +1,17 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BottomTabBar, type BottomTabBarProps } from 'expo-router/js-tabs';
 import { COLORS } from '@/constants/theme';
-import { useIsWide } from '@/hooks/useIsWide';
+import { useShowsSideRail } from '@/hooks/useIsWide';
 
-// App tab bar. On narrow screens this renders the standard bottom bar,
-// unchanged. On wide screens (unfolded iPhone Duo, iPad) the tab buttons
+// App tab bar. On regular iPhones this renders the standard bottom bar,
+// unchanged. On the iPhone Duo (open or folded) and iPad the tab buttons
 // move to a vertical rail on the right side of the screen, paired with
 // tabBarPosition: 'right' in the tabs layout so the content sits to the
 // left of the rail instead of underneath it.
 export default function AppTabBar(props: BottomTabBarProps) {
-  const wide = useIsWide();
+  const rail = useShowsSideRail();
 
-  if (!wide) {
+  if (!rail) {
     return <BottomTabBar {...props} />;
   }
 

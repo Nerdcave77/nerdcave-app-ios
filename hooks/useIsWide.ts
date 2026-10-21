@@ -25,3 +25,18 @@ export function useIsWideLandscape(breakpoint = 600): boolean {
   const { width, height } = useWindowDimensions();
   return width >= breakpoint && width > height;
 }
+
+// Ceelow's rule (2026-10-21): the Duo gets the right side rail in every
+// posture, folded included, while regular iPhones keep the bottom bar.
+// Apps cannot ask "is this a Duo", so the folded Duo is recognized by
+// its screen shape: about 466pt wide (every iPhone is 440pt or less)
+// and much squarer than a phone (height/width about 1.45, phones are
+// about 2.1). Wide screens (600+) always get the rail.
+export function useShowsSideRail(): boolean {
+  const { width, height } = useWindowDimensions();
+  if (width >= 600) {
+    return true;
+  }
+  const foldedDuoShape = width >= 450 && height / width < 1.7;
+  return foldedDuoShape;
+}
