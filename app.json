@@ -19,7 +19,7 @@
     },
     "icon": "./assets/images/icon.png",
     "ios": {
-      "buildNumber": "20",
+      "buildNumber": "21",
       "bundleIdentifier": "io.nerdcave77.reader",
       "supportsTablet": true,
       "infoPlist": {
