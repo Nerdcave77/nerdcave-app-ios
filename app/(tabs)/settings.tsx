@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,22 +16,52 @@ import {
   requestPushPermission,
   setPushOptedIn,
 } from '@/lib/onesignal';
+import {
+  getEmailPromptState,
+  looksLikeEmail,
+  setEmailPromptState,
+  subscribeEmail,
+} from '@/lib/newsletter';
 
 export default function SettingsScreen() {
   const [alertsOn, setAlertsOn] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [emailJoined, setEmailJoined] = useState(false);
+  const [emailBusy, setEmailBusy] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     (async () => {
       const optedIn = await isPushOptedIn();
       if (active) setAlertsOn(optedIn);
+      const promptState = await getEmailPromptState();
+      if (active && promptState === 'subscribed') setEmailJoined(true);
     })();
     return () => {
       active = false;
     };
   }, []);
+
+  const joinEmail = useCallback(async () => {
+    if (!looksLikeEmail(email)) {
+      setEmailStatus('That email looks off. Check it and try again.');
+      return;
+    }
+    setEmailBusy(true);
+    setEmailStatus(null);
+    const ok = await subscribeEmail(email, 'ios-settings');
+    setEmailBusy(false);
+    if (ok) {
+      await setEmailPromptState('subscribed');
+      setEmailJoined(true);
+      setEmailStatus('You are on the list. Welcome in.');
+    } else {
+      setEmailStatus('Could not sign you up just now. Try again in a bit.');
+    }
+  }, [email]);
 
   const onToggle = useCallback(
     async (value: boolean) => {
@@ -99,6 +130,46 @@ export default function SettingsScreen() {
             )}
           </View>
           {!!status && <Text style={styles.status}>{status}</Text>}
+        </View>
+
+        <View style={styles.card}>
+          <View style={styles.rowText}>
+            <Text style={styles.rowTitle}>Free Nerdcave77 email</Text>
+            <Text style={styles.rowSubtitle}>
+              Big sales, drops and market moves, in your inbox
+            </Text>
+          </View>
+          {emailJoined ? (
+            <Text style={styles.status}>You are on the list. Welcome in.</Text>
+          ) : (
+            <>
+              <TextInput
+                style={styles.emailInput}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="you@email.com"
+                placeholderTextColor="rgba(255,255,255,0.45)"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                textContentType="emailAddress"
+                editable={!emailBusy}
+              />
+              <Pressable
+                style={styles.joinButton}
+                onPress={joinEmail}
+                disabled={emailBusy}
+              >
+                {emailBusy ? (
+                  <ActivityIndicator color={COLORS.card} size="small" />
+                ) : (
+                  <Text style={styles.joinButtonText}>Join free</Text>
+                )}
+              </Pressable>
+              {!!emailStatus && <Text style={styles.status}>{emailStatus}</Text>}
+            </>
+          )}
         </View>
 
         <Pressable style={styles.card} onPress={openSupport}>
@@ -181,6 +252,27 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 12,
     lineHeight: 18,
+  },
+  emailInput: {
+    marginTop: 12,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    color: COLORS.white,
+    fontSize: 15,
+  },
+  joinButton: {
+    marginTop: 10,
+    backgroundColor: COLORS.yellow,
+    borderRadius: 10,
+    paddingVertical: 11,
+    alignItems: 'center',
+  },
+  joinButtonText: {
+    color: COLORS.card,
+    fontSize: 15,
+    fontWeight: '900',
   },
   chevron: {
     color: COLORS.muted,

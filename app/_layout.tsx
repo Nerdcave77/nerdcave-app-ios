@@ -7,6 +7,12 @@ import {
 } from 'react-native-onesignal';
 import { initOneSignal } from '@/lib/onesignal';
 import LaunchIntro from '@/components/LaunchIntro';
+import EmailCaptureCard from '@/components/EmailCaptureCard';
+import {
+  getEmailPromptState,
+  setEmailPromptState,
+  type EmailPromptState,
+} from '@/lib/newsletter';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -23,6 +29,7 @@ let introPlayed = false;
 
 export default function RootLayout() {
   const [showIntro, setShowIntro] = useState(() => !introPlayed);
+  const [showEmailPrompt, setShowEmailPrompt] = useState(false);
 
   useEffect(() => {
     initOneSignal();
@@ -63,6 +70,32 @@ export default function RootLayout() {
     setShowIntro(false);
   }, []);
 
+  // Soft first-launch email prompt (Ceelow, 2026-10-23): only when the
+  // person has never answered it, and only a few seconds AFTER the
+  // intro, so they land on the feed first and see the value. It never
+  // blocks the app; Join and Not now both count as answered.
+  useEffect(() => {
+    if (showIntro) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let active = true;
+    (async () => {
+      const state = await getEmailPromptState();
+      if (!active || state !== null) return;
+      timer = setTimeout(() => {
+        if (active) setShowEmailPrompt(true);
+      }, 4000);
+    })();
+    return () => {
+      active = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, [showIntro]);
+
+  const handleEmailPromptDone = useCallback((state: EmailPromptState) => {
+    setShowEmailPrompt(false);
+    void setEmailPromptState(state);
+  }, []);
+
   return (
     <>
       <Stack>
@@ -77,6 +110,7 @@ export default function RootLayout() {
         />
       </Stack>
       {showIntro && <LaunchIntro onDone={handleIntroDone} />}
+      {showEmailPrompt && <EmailCaptureCard onDone={handleEmailPromptDone} />}
     </>
   );
 }
