@@ -141,23 +141,6 @@ export default function SettingsScreen() {
           {!!status && <Text style={styles.status}>{status}</Text>}
         </View>
 
-        <View style={styles.card}>
-          <View style={styles.row}>
-            <View style={styles.rowText}>
-              <Text style={styles.rowTitle}>Dark mode</Text>
-              <Text style={styles.rowSubtitle}>
-                Deep navy background, easy on the eyes at night
-              </Text>
-            </View>
-            <Switch
-              value={mode === 'dark'}
-              onValueChange={(value) => setMode(value ? 'dark' : 'light')}
-              trackColor={{ false: 'rgba(255,255,255,0.25)', true: COLORS.yellow }}
-              thumbColor={COLORS.white}
-            />
-          </View>
-        </View>
-
         {EMAIL_JOIN_ENABLED && (
         <View style={styles.card}>
           <View style={styles.rowText}>
@@ -209,6 +192,25 @@ export default function SettingsScreen() {
             <Text style={styles.chevron}>›</Text>
           </View>
         </Pressable>
+
+        {/* Dark mode under Support, matching the web Settings layout
+            (Ceelow, 2026-10-29). */}
+        <View style={styles.card}>
+          <View style={styles.row}>
+            <View style={styles.rowText}>
+              <Text style={styles.rowTitle}>Dark mode</Text>
+              <Text style={styles.rowSubtitle}>
+                Deep navy background, easy on the eyes at night
+              </Text>
+            </View>
+            <Switch
+              value={mode === 'dark'}
+              onValueChange={(value) => setMode(value ? 'dark' : 'light')}
+              trackColor={{ false: 'rgba(255,255,255,0.25)', true: COLORS.yellow }}
+              thumbColor={COLORS.white}
+            />
+          </View>
+        </View>
 
         <Pressable style={styles.card} onPress={openSite}>
           <View style={styles.row}>
