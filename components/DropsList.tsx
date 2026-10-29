@@ -6,6 +6,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -87,6 +88,7 @@ function DropCard({ drop }: { drop: Drop }) {
 export default function DropsList({ compact = false }: { compact?: boolean }) {
   const [drops, setDrops] = useState<Drop[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
+  const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,7 +114,29 @@ export default function DropsList({ compact = false }: { compact?: boolean }) {
     load();
   }, [load]);
 
-  const visible = drops.filter((d) => filter === 'all' || d.type === filter);
+  const q = query.trim().toLowerCase();
+  const matchesQuery = (d: Drop) => {
+    if (!q) return true;
+    const typeText =
+      d.type === 'physical'
+        ? 'Trading cards'
+        : d.type === 'comics'
+          ? 'Comics'
+          : 'Digital collectible';
+    const haystack = [
+      d.name,
+      d.brand,
+      typeText,
+      formatDropDate(d.date, d.timeLabel, d.status),
+    ]
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(q);
+  };
+
+  const visible = drops.filter(
+    (d) => matchesQuery(d) && (filter === 'all' || d.type === filter)
+  );
 
   if (loading && !refreshing) {
     return (
@@ -145,6 +169,16 @@ export default function DropsList({ compact = false }: { compact?: boolean }) {
               </Text>
             </>
           )}
+          <TextInput
+            style={styles.search}
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search drops..."
+            placeholderTextColor="rgba(255,255,255,0.4)"
+            autoCapitalize="none"
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+          />
           <View style={styles.filters}>
             {FILTERS.map((f) => (
               <Pressable
@@ -177,9 +211,11 @@ export default function DropsList({ compact = false }: { compact?: boolean }) {
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>The scout is watching 👀</Text>
             <Text style={styles.emptyBody}>
-              {drops.length === 0
-                ? 'No drops on the calendar yet — new releases land here as they are announced. Check back soon.'
-                : 'Nothing in this category yet — try another filter.'}
+              {q
+                ? `No results for "${query.trim()}".`
+                : drops.length === 0
+                  ? 'No drops on the calendar yet — new releases land here as they are announced. Check back soon.'
+                  : 'Nothing in this category yet — try another filter.'}
             </Text>
             <Text style={styles.emptyNote}>
               Enable notifications in Settings and we’ll ping you when drops are added.
@@ -219,6 +255,15 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 12,
     marginBottom: 12,
+  },
+  search: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: COLORS.white,
+    marginTop: 12,
   },
   pill: {
     borderRadius: 999,
