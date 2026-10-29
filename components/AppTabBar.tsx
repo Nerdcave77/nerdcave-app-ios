@@ -17,7 +17,7 @@ export default function AppTabBar(props: BottomTabBarProps) {
     return <BottomTabBar {...props} />;
   }
 
-  const { state, descriptors, insets } = props;
+  const { state, descriptors, insets, emitter, navigateToTab } = props;
 
   return (
     <View
@@ -33,16 +33,6 @@ export default function AppTabBar(props: BottomTabBarProps) {
     >
       {state.routes.map((route, index) => {
         const options = descriptors[route.key].options;
-        // SDK 58 narrowed the descriptor navigation type; at runtime it is
-        // the full tab navigation object with emit/navigate.
-        const navigation = descriptors[route.key].navigation as unknown as {
-          emit: (event: {
-            type: string;
-            target?: string;
-            canPreventDefault?: boolean;
-          }) => { defaultPrevented: boolean };
-          navigate: (name: string, params?: object) => void;
-        };
         const focused = state.index === index;
         const color = focused
           ? options.tabBarActiveTintColor ?? COLORS.yellow
@@ -52,18 +42,23 @@ export default function AppTabBar(props: BottomTabBarProps) {
             ? options.tabBarLabel
             : options.title ?? route.name;
 
+        // Press handling matches the stock SDK 58 BottomTabBar exactly:
+        // emit tabPress on the bar's own emitter, then navigateToTab.
+        // (Build 25 crashed on every rail tab tap: it reached for
+        // descriptors[route.key].navigation emit/navigate, which is not
+        // how this tab implementation works.)
         const onPress = () => {
-          const event = navigation.emit({
+          const event = emitter.emit({
             type: 'tabPress',
             target: route.key,
             canPreventDefault: true,
           });
           if (!focused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
+            navigateToTab(route.key);
           }
         };
         const onLongPress = () => {
-          navigation.emit({ type: 'tabLongPress', target: route.key });
+          emitter.emit({ type: 'tabLongPress', target: route.key });
         };
 
         return (
