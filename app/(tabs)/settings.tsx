@@ -23,6 +23,10 @@ import {
   subscribeEmail,
 } from '@/lib/newsletter';
 
+// Email join card is PARKED (Ceelow, 2026-10-23 reversal): code stays in
+// the tree, unmounted. Flip to true to restore.
+const EMAIL_JOIN_ENABLED = false;
+
 export default function SettingsScreen() {
   const [alertsOn, setAlertsOn] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -132,6 +136,7 @@ export default function SettingsScreen() {
           {!!status && <Text style={styles.status}>{status}</Text>}
         </View>
 
+        {EMAIL_JOIN_ENABLED && (
         <View style={styles.card}>
           <View style={styles.rowText}>
             <Text style={styles.rowTitle}>Free Nerdcave77 email</Text>
@@ -171,6 +176,7 @@ export default function SettingsScreen() {
             </>
           )}
         </View>
+        )}
 
         <Pressable style={styles.card} onPress={openSupport}>
           <View style={styles.row}>

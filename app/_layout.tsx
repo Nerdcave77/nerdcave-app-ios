@@ -23,6 +23,10 @@ export const unstable_settings = {
 SplashScreen.setOptions({ duration: 250, fade: true });
 SplashScreen.preventAutoHideAsync();
 
+// Email prompt is PARKED (Ceelow, 2026-10-23 reversal): the component and
+// its state logic stay in the tree, unmounted. Flip to true to restore.
+const EMAIL_PROMPT_ENABLED = false;
+
 // Cold-start only: the comic-burst intro plays once per app launch,
 // never on Fast Refresh or foregrounding.
 let introPlayed = false;
@@ -110,7 +114,7 @@ export default function RootLayout() {
         />
       </Stack>
       {showIntro && <LaunchIntro onDone={handleIntroDone} />}
-      {showEmailPrompt && <EmailCaptureCard onDone={handleEmailPromptDone} />}
+      {EMAIL_PROMPT_ENABLED && showEmailPrompt && <EmailCaptureCard onDone={handleEmailPromptDone} />}
     </>
   );
 }
