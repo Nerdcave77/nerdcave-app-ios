@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import {
   formatEventDate,
   getMarketNews,
@@ -72,6 +73,7 @@ function MarketCard({ item }: { item: MarketNews }) {
 // Market news list. Shared by the Market tab and the Duo two-pane layout.
 // In compact mode (Duo pane) the big "Market" heading is skipped.
 export default function MarketList({ compact = false }: { compact?: boolean }) {
+  const { colors } = useTheme();
   const [items, setItems] = useState<MarketNews[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -117,14 +119,22 @@ export default function MarketList({ compact = false }: { compact?: boolean }) {
       }
       ListHeaderComponent={
         compact ? (
-          !!error ? <Text style={styles.error}>{error}</Text> : undefined
+          !!error ? (
+            <Text style={[styles.error, { color: colors.errorOnBackground }]}>
+              {error}
+            </Text>
+          ) : undefined
         ) : (
           <View style={styles.header}>
-            <Text style={styles.heading}>Market</Text>
-            <Text style={styles.subheading}>
+            <Text style={[styles.heading, { color: colors.ink }]}>Market</Text>
+            <Text style={[styles.subheading, { color: colors.ink }]}>
               Big sales, new-comics sell-through, card and digital movers, market trends
             </Text>
-            {!!error && <Text style={styles.error}>{error}</Text>}
+            {!!error && (
+              <Text style={[styles.error, { color: colors.errorOnBackground }]}>
+                {error}
+              </Text>
+            )}
           </View>
         )
       }

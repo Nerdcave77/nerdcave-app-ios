@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import FeedList from '@/components/FeedList';
 import MarketList from '@/components/MarketList';
 import DropsList from '@/components/DropsList';
@@ -21,10 +22,14 @@ export default function DuoHome({
 }: {
   initialRight?: DuoRightPane;
 }) {
+  const { colors } = useTheme();
   const [right, setRight] = useState<DuoRightPane>(initialRight);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: colors.background }]}
+      edges={['top']}
+    >
       <View style={styles.row}>
         <View style={styles.leftPane}>
           <FeedList compact />

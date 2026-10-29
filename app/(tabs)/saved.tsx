@@ -3,11 +3,13 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import { getSavedArticles } from '@/lib/saved';
 import type { Article } from '@/lib/api';
 import ArticleCard from '@/components/ArticleCard';
 
 export default function SavedScreen() {
+  const { colors } = useTheme();
   const [saved, setSaved] = useState<Article[]>([]);
 
   useFocusEffect(
@@ -24,7 +26,10 @@ export default function SavedScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: colors.background }]}
+      edges={['top']}
+    >
       <FlatList
         data={saved}
         keyExtractor={(item) => item.id}
@@ -32,14 +37,18 @@ export default function SavedScreen() {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.heading}>Saved</Text>
-            <Text style={styles.subheading}>Your reading list</Text>
+            <Text style={[styles.heading, { color: colors.ink }]}>Saved</Text>
+            <Text style={[styles.subheading, { color: colors.ink }]}>
+              Your reading list
+            </Text>
           </View>
         }
         ListEmptyComponent={
           <View style={styles.center}>
-            <Text style={styles.emptyTitle}>No saved articles yet</Text>
-            <Text style={styles.emptyBody}>
+            <Text style={[styles.emptyTitle, { color: colors.ink }]}>
+              No saved articles yet
+            </Text>
+            <Text style={[styles.emptyBody, { color: colors.ink }]}>
               Tap the bookmark icon on any article to save it here.
             </Text>
           </View>

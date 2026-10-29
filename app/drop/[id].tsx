@@ -12,6 +12,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import * as WebBrowser from 'expo-web-browser';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import {
   formatDropDate,
   getDrops,
@@ -37,6 +38,7 @@ function StatusBadge({ status }: { status: Drop['status'] }) {
 }
 
 export default function DropDetailScreen() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [drop, setDrop] = useState<Drop | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,12 +96,12 @@ export default function DropDetailScreen() {
       </View>
 
       {loading ? (
-        <View style={styles.center}>
+        <View style={[styles.center, { backgroundColor: colors.background }]}>
           <ActivityIndicator size="large" color={COLORS.yellow} />
         </View>
       ) : error || !drop ? (
-        <View style={styles.center}>
-          <Text style={styles.errorText}>
+        <View style={[styles.center, { backgroundColor: colors.background }]}>
+          <Text style={[styles.errorText, { color: colors.ink }]}>
             {error ?? 'Could not load the drop.'}
           </Text>
           <Pressable style={styles.retryButton} onPress={retry}>
@@ -108,7 +110,7 @@ export default function DropDetailScreen() {
         </View>
       ) : (
         <ScrollView
-          style={styles.body}
+          style={[styles.body, { backgroundColor: colors.background }]}
           contentContainerStyle={styles.scroll}
         >
           <View style={styles.card}>

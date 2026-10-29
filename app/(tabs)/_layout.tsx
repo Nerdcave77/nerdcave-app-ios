@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import type { ColorValue } from 'react-native';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import { useShowsSideRail } from '@/hooks/useIsWide';
 import AppTabBar from '@/components/AppTabBar';
 
@@ -16,6 +17,7 @@ function TabIcon({
 }
 
 export default function TabLayout() {
+  const { colors } = useTheme();
   const rail = useShowsSideRail();
 
   return (
@@ -29,7 +31,7 @@ export default function TabLayout() {
         tabBarPosition: rail ? 'right' : 'bottom',
         tabBarActiveTintColor: COLORS.yellow,
         tabBarInactiveTintColor: 'rgba(255,255,255,0.55)',
-        tabBarStyle: { backgroundColor: COLORS.cardDeep },
+        tabBarStyle: { backgroundColor: colors.cardDeep },
         tabBarLabelStyle: { fontSize: 11 },
       }}
     >

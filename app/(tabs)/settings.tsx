@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import {
   isPushOptedIn,
   requestPushPermission,
@@ -28,6 +29,7 @@ import {
 const EMAIL_JOIN_ENABLED = false;
 
 export default function SettingsScreen() {
+  const { colors, mode, setMode } = useTheme();
   const [alertsOn, setAlertsOn] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -108,10 +110,13 @@ export default function SettingsScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: colors.background }]}
+      edges={['top']}
+    >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.heading}>Settings</Text>
+          <Text style={[styles.heading, { color: colors.ink }]}>Settings</Text>
         </View>
 
         <View style={styles.card}>
@@ -134,6 +139,23 @@ export default function SettingsScreen() {
             )}
           </View>
           {!!status && <Text style={styles.status}>{status}</Text>}
+        </View>
+
+        <View style={styles.card}>
+          <View style={styles.row}>
+            <View style={styles.rowText}>
+              <Text style={styles.rowTitle}>Dark mode</Text>
+              <Text style={styles.rowSubtitle}>
+                Deep navy background, easy on the eyes at night
+              </Text>
+            </View>
+            <Switch
+              value={mode === 'dark'}
+              onValueChange={(value) => setMode(value ? 'dark' : 'light')}
+              trackColor={{ false: 'rgba(255,255,255,0.25)', true: COLORS.yellow }}
+              thumbColor={COLORS.white}
+            />
+          </View>
         </View>
 
         {EMAIL_JOIN_ENABLED && (
@@ -199,7 +221,7 @@ export default function SettingsScreen() {
         </Pressable>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
+          <Text style={[styles.footerText, { color: colors.ink }]}>
             Nerdcave77 — your go-to for digital &amp; physical collectibles news
           </Text>
         </View>

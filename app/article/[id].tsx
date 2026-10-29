@@ -15,21 +15,22 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { WebView } from 'react-native-webview';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import { getArticle, type Article } from '@/lib/api';
 import { isSaved, saveArticle, unsaveArticle } from '@/lib/saved';
 
-function wrapHtml(contentHtml: string): string {
+function wrapHtml(contentHtml: string, textColor: string, linkColor: string): string {
   return `<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body { color:#17203a; font-family:-apple-system,Helvetica,Arial,sans-serif; font-size:17px; line-height:1.75; margin:0; padding:0; }
+body { color:${textColor}; font-family:-apple-system,Helvetica,Arial,sans-serif; font-size:17px; line-height:1.75; margin:0; padding:0; }
 * { background:transparent !important; background-color:transparent !important; }
 #web-header { display:none !important; }
-p,div,span,li,h1,h2,h3 { color:#17203a !important; }
+p,div,span,li,h1,h2,h3 { color:${textColor} !important; }
 img { max-width:100%; height:auto; border-radius:12px; margin:18px auto; display:block; }
-a { color:#1d4ed8; }
+a { color:${linkColor}; }
 h2{font-size:22px} h3{font-size:19px}
 blockquote{border-left:3px solid #ffd60a;padding-left:14px;font-style:italic;}
 </style>
@@ -100,6 +101,7 @@ function shareTargets(article: Article): { label: string; url: string }[] {
 }
 
 export default function ArticleScreen() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
@@ -180,12 +182,12 @@ export default function ArticleScreen() {
       </View>
 
       {loading ? (
-        <View style={styles.center}>
+        <View style={[styles.center, { backgroundColor: colors.background }]}>
           <ActivityIndicator size="large" color={COLORS.yellow} />
         </View>
       ) : error || !article ? (
-        <View style={styles.center}>
-          <Text style={styles.errorText}>
+        <View style={[styles.center, { backgroundColor: colors.background }]}>
+          <Text style={[styles.errorText, { color: colors.ink }]}>
             {error ?? 'Could not load the article.'}
           </Text>
           <Pressable style={styles.retryButton} onPress={retry}>
@@ -194,7 +196,7 @@ export default function ArticleScreen() {
         </View>
       ) : (
         <ScrollView
-          style={styles.body}
+          style={[styles.body, { backgroundColor: colors.background }]}
           contentContainerStyle={styles.scroll}
         >
           {!!article.thumbnail_url && (
@@ -204,10 +206,14 @@ export default function ArticleScreen() {
               resizeMode="cover"
             />
           )}
-          <View style={styles.card}>
-            <Text style={styles.title}>{article.title}</Text>
+          <View style={[styles.card, { backgroundColor: colors.articleBg }]}>
+            <Text style={[styles.title, { color: colors.ink }]}>
+              {article.title}
+            </Text>
             {!!article.subtitle && (
-              <Text style={styles.subtitle}>{article.subtitle}</Text>
+              <Text style={[styles.subtitle, { color: colors.mutedDark }]}>
+                {article.subtitle}
+              </Text>
             )}
             <View style={styles.authorRow}>
               {!!byline.avatarUrl && (
@@ -217,11 +223,11 @@ export default function ArticleScreen() {
                 />
               )}
               <View>
-                <Text style={styles.authorName}>
+                <Text style={[styles.authorName, { color: colors.ink }]}>
                   {byline.authorName || 'Ceelow G'}
                 </Text>
                 {!!article.publish_date && (
-                  <Text style={styles.date}>
+                  <Text style={[styles.date, { color: colors.mutedDark }]}>
                     {formatDate(article.publish_date)}
                   </Text>
                 )}
@@ -231,17 +237,24 @@ export default function ArticleScreen() {
               {shareTargets(article).map((s) => (
                 <Pressable
                   key={s.label}
-                  style={styles.shareButton}
+                  style={[
+                    styles.shareButton,
+                    { backgroundColor: colors.shareButtonBg },
+                  ]}
                   accessibilityLabel={`Share via ${s.label}`}
                   onPress={() => Linking.openURL(s.url)}
                 >
-                  <Text style={styles.shareLabel}>{s.label}</Text>
+                  <Text style={[styles.shareLabel, { color: colors.mutedDark }]}>
+                    {s.label}
+                  </Text>
                 </Pressable>
               ))}
             </View>
             <WebView
               originWhitelist={['*']}
-              source={{ html: wrapHtml(article.content_html) }}
+              source={{
+                html: wrapHtml(article.content_html, colors.articleText, colors.link),
+              }}
               injectedJavaScript={INJECTED_JS}
               onMessage={(event) => {
                 const h = parseInt(event.nativeEvent.data, 10);

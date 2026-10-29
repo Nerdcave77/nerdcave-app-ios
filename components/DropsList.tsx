@@ -12,6 +12,7 @@ import {
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import {
   formatDropDate,
   getDrops,
@@ -86,6 +87,7 @@ function DropCard({ drop }: { drop: Drop }) {
 // In compact mode (Duo pane) the big "Drop Calendar" heading is skipped but
 // the filter pills stay, since they are functional.
 export default function DropsList({ compact = false }: { compact?: boolean }) {
+  const { colors } = useTheme();
   const [drops, setDrops] = useState<Drop[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
@@ -163,8 +165,10 @@ export default function DropsList({ compact = false }: { compact?: boolean }) {
         <View>
           {!compact && (
             <>
-              <Text style={styles.heading}>Drop Calendar</Text>
-              <Text style={styles.subheading}>
+              <Text style={[styles.heading, { color: colors.ink }]}>
+                Drop Calendar
+              </Text>
+              <Text style={[styles.subheading, { color: colors.ink }]}>
                 Upcoming physical card sets, comics &amp; digital collectible drops. Never miss one.
               </Text>
             </>

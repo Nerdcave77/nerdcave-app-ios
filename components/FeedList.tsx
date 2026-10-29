@@ -10,12 +10,14 @@ import {
   View,
 } from 'react-native';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import { getArticles, type Article } from '@/lib/api';
 import ArticleCard from '@/components/ArticleCard';
 
 // Article feed list. Shared by the Feed tab and the Duo two-pane layout.
 // In compact mode (Duo pane) the big brand header is skipped.
 export default function FeedList({ compact = false }: { compact?: boolean }) {
+  const { colors } = useTheme();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -77,10 +79,10 @@ export default function FeedList({ compact = false }: { compact?: boolean }) {
               style={styles.logo}
             />
             <View>
-              <Text style={styles.brand}>
+              <Text style={[styles.brand, { color: colors.ink }]}>
                 Nerdcave<Text style={styles.brandAccent}>77</Text>
               </Text>
-              <Text style={styles.tagline}>
+              <Text style={[styles.tagline, { color: colors.ink }]}>
                 Digital &amp; physical collectibles news
               </Text>
             </View>
@@ -90,14 +92,18 @@ export default function FeedList({ compact = false }: { compact?: boolean }) {
       ListEmptyComponent={
         error ? (
           <View style={styles.center}>
-            <Text style={styles.errorText}>{error}</Text>
+            <Text style={[styles.errorText, { color: colors.ink }]}>
+              {error}
+            </Text>
             <Pressable style={styles.retryButton} onPress={retry}>
               <Text style={styles.retryText}>Try again</Text>
             </Pressable>
           </View>
         ) : (
           <View style={styles.center}>
-            <Text style={styles.emptyText}>No articles yet.</Text>
+            <Text style={[styles.emptyText, { color: colors.ink }]}>
+              No articles yet.
+            </Text>
           </View>
         )
       }

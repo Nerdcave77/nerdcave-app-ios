@@ -6,6 +6,7 @@ import {
   type NotificationClickEvent,
 } from 'react-native-onesignal';
 import { initOneSignal } from '@/lib/onesignal';
+import { ThemeProvider, ThemedStatusBar } from '@/lib/theme';
 import LaunchIntro from '@/components/LaunchIntro';
 import EmailCaptureCard from '@/components/EmailCaptureCard';
 import {
@@ -101,7 +102,8 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <>
+    <ThemeProvider>
+      <ThemedStatusBar />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
@@ -115,6 +117,6 @@ export default function RootLayout() {
       </Stack>
       {showIntro && <LaunchIntro onDone={handleIntroDone} />}
       {EMAIL_PROMPT_ENABLED && showEmailPrompt && <EmailCaptureCard onDone={handleEmailPromptDone} />}
-    </>
+    </ThemeProvider>
   );
 }

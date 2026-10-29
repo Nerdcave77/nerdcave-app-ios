@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BottomTabBar, type BottomTabBarProps } from 'expo-router/js-tabs';
 import { COLORS } from '@/constants/theme';
+import { useTheme } from '@/lib/theme';
 import { useShowsSideRail } from '@/hooks/useIsWide';
 
 // App tab bar. On regular iPhones this renders the standard bottom bar,
@@ -9,6 +10,7 @@ import { useShowsSideRail } from '@/hooks/useIsWide';
 // tabBarPosition: 'right' in the tabs layout so the content sits to the
 // left of the rail instead of underneath it.
 export default function AppTabBar(props: BottomTabBarProps) {
+  const { colors } = useTheme();
   const rail = useShowsSideRail();
 
   if (!rail) {
@@ -23,6 +25,7 @@ export default function AppTabBar(props: BottomTabBarProps) {
       style={[
         styles.rail,
         {
+          backgroundColor: colors.cardDeep,
           paddingTop: Math.max(insets.top, 12),
           paddingBottom: Math.max(insets.bottom, 12),
         },
