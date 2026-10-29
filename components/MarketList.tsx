@@ -117,7 +117,7 @@ export default function MarketList({ compact = false }: { compact?: boolean }) {
       }
       ListHeaderComponent={
         compact ? (
-          !!error ? <Text style={styles.error}>{error}</Text> : null
+          !!error ? <Text style={styles.error}>{error}</Text> : undefined
         ) : (
           <View style={styles.header}>
             <Text style={styles.heading}>Market</Text>
@@ -136,7 +136,7 @@ export default function MarketList({ compact = false }: { compact?: boolean }) {
               This morning&rsquo;s scan hasn&rsquo;t posted yet. Pull down to check again in a bit.
             </Text>
           </View>
-        ) : null
+        ) : undefined
       }
     />
   );

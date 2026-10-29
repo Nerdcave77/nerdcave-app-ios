@@ -15,7 +15,7 @@ export default function AppTabBar(props: BottomTabBarProps) {
     return <BottomTabBar {...props} />;
   }
 
-  const { state, descriptors, navigation, insets } = props;
+  const { state, descriptors, insets } = props;
 
   return (
     <View
@@ -30,6 +30,16 @@ export default function AppTabBar(props: BottomTabBarProps) {
     >
       {state.routes.map((route, index) => {
         const options = descriptors[route.key].options;
+        // SDK 58 narrowed the descriptor navigation type; at runtime it is
+        // the full tab navigation object with emit/navigate.
+        const navigation = descriptors[route.key].navigation as unknown as {
+          emit: (event: {
+            type: string;
+            target?: string;
+            canPreventDefault?: boolean;
+          }) => { defaultPrevented: boolean };
+          navigate: (name: string, params?: object) => void;
+        };
         const focused = state.index === index;
         const color = focused
           ? options.tabBarActiveTintColor ?? COLORS.yellow

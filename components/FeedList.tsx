@@ -70,7 +70,7 @@ export default function FeedList({ compact = false }: { compact?: boolean }) {
         />
       }
       ListHeaderComponent={
-        compact ? null : (
+        compact ? undefined : (
           <View style={styles.header}>
             <Image
               source={require('@/assets/images/logo.png')}
