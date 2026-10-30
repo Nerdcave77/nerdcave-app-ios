@@ -213,7 +213,6 @@ export default function DropsList({ compact = false }: { compact?: boolean }) {
       ListEmptyComponent={
         !error ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>The scout is watching 👀</Text>
             <Text style={styles.emptyBody}>
               {q
                 ? `No results for "${query.trim()}".`
@@ -390,13 +389,7 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
   },
-  emptyTitle: {
-    color: COLORS.white,
-    fontSize: 18,
-    fontWeight: '800',
-  },
   emptyBody: {
-    marginTop: 8,
     color: 'rgba(255,255,255,0.6)',
     fontSize: 14,
     lineHeight: 20,
