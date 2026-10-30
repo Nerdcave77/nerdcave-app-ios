@@ -25,6 +25,13 @@ function wrapHtml(contentHtml: string, textColor: string, linkColor: string): st
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
+/* Beehiiv body copy carries inline styles like
+   color:#2D2D2D;color:var(--wt-text-on-background-color) !important.
+   An inline !important beats any stylesheet rule, so the paragraph color
+   can only be themed through Beehiiv's own variable. It is undefined in
+   this WebView, which left dark-mode articles rendering the dark fallback
+   color on the dark card. Define it from the app theme. */
+:root { --wt-text-on-background-color:${textColor}; }
 body { color:${textColor}; font-family:-apple-system,Helvetica,Arial,sans-serif; font-size:17px; line-height:1.75; margin:0; padding:0; }
 * { background:transparent !important; background-color:transparent !important; }
 #web-header { display:none !important; }
