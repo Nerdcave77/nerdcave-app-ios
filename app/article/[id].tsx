@@ -166,26 +166,31 @@ export default function ArticleScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.topBar}>
-        <Pressable
-          style={styles.iconButton}
-          onPress={() => router.back()}
-          accessibilityLabel="Back"
-        >
-          <SymbolView name="chevron.left" tintColor="#ffffff" size={24} />
-        </Pressable>
-        {article && (
+        {/* Back and Save sit together on the left. The top-right corner is
+            where the iPhone Duo's camera and status cluster live, and the
+            Save button used to hide behind it there. */}
+        <View style={styles.topBarLeft}>
           <Pressable
             style={styles.iconButton}
-            onPress={toggleSave}
-            accessibilityLabel={saved ? 'Unsave article' : 'Save article'}
+            onPress={() => router.back()}
+            accessibilityLabel="Back"
           >
-            <SymbolView
-              name={saved ? 'bookmark.fill' : 'bookmark'}
-              tintColor={saved ? COLORS.yellow : '#ffffff'}
-              size={24}
-            />
+            <SymbolView name="chevron.left" tintColor="#ffffff" size={24} />
           </Pressable>
-        )}
+          {article && (
+            <Pressable
+              style={styles.iconButton}
+              onPress={toggleSave}
+              accessibilityLabel={saved ? 'Unsave article' : 'Save article'}
+            >
+              <SymbolView
+                name={saved ? 'bookmark.fill' : 'bookmark'}
+                tintColor={saved ? COLORS.yellow : '#ffffff'}
+                size={24}
+              />
+            </Pressable>
+          )}
+        </View>
       </View>
 
       {loading ? (
@@ -285,11 +290,14 @@ const styles = StyleSheet.create({
   },
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 4,
     backgroundColor: COLORS.cardDeep,
+  },
+  topBarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   iconButton: {
     padding: 10,
