@@ -23,7 +23,7 @@
     "owner": "nerdcave77",
     "icon": "./assets/images/icon.png",
     "ios": {
-      "buildNumber": "26",
+      "buildNumber": "27",
       "bundleIdentifier": "io.nerdcave77.reader",
       "supportsTablet": true,
       "infoPlist": {
