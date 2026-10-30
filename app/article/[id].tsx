@@ -20,17 +20,27 @@ import { getArticle, type Article } from '@/lib/api';
 import { isSaved, saveArticle, unsaveArticle } from '@/lib/saved';
 
 function wrapHtml(contentHtml: string, textColor: string, linkColor: string): string {
+  // Beehiiv embeds its own <style> :root block inside content_html that
+  // defines --wt-text-on-background-color (black in this template). That
+  // block lands after this document's head styles, so it wins the cascade
+  // tie against the :root rule below, and every paragraph's inline
+  // color:var(--wt-text-on-background-color) !important resolves to black,
+  // unreadable on the dark card in dark mode. Rewrite Beehiiv's variable
+  // definition to the app theme color before wrapping.
+  const themedHtml = contentHtml.replace(
+    /--wt-text-on-background-color\s*:\s*[^;}]+/g,
+    `--wt-text-on-background-color:${textColor}`,
+  );
   return `<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 /* Beehiiv body copy carries inline styles like
-   color:#2D2D2D;color:var(--wt-text-on-background-color) !important.
-   An inline !important beats any stylesheet rule, so the paragraph color
-   can only be themed through Beehiiv's own variable. It is undefined in
-   this WebView, which left dark-mode articles rendering the dark fallback
-   color on the dark card. Define it from the app theme. */
+   color:var(--wt-text-on-background-color) !important, which beat any
+   stylesheet rule. The themed rewrite in wrapHtml handles the color;
+   this :root line stays as a fallback if a template ever ships without
+   its own variable definition. */
 :root { --wt-text-on-background-color:${textColor}; }
 body { color:${textColor}; font-family:-apple-system,Helvetica,Arial,sans-serif; font-size:17px; line-height:1.75; margin:0; padding:0; }
 * { background:transparent !important; background-color:transparent !important; }
@@ -42,7 +52,7 @@ h2{font-size:22px} h3{font-size:19px}
 blockquote{border-left:3px solid #ffd60a;padding-left:14px;font-style:italic;}
 </style>
 </head>
-<body>${contentHtml}</body>
+<body>${themedHtml}</body>
 </html>`;
 }
 
