@@ -23,7 +23,7 @@
     "owner": "nerdcave77",
     "icon": "./assets/images/icon.png",
     "ios": {
-      "buildNumber": "29",
+      "buildNumber": "30",
       "bundleIdentifier": "io.nerdcave77.reader",
       "supportsTablet": true,
       "infoPlist": {
@@ -52,7 +52,7 @@
     "scheme": "nerdcave77",
     "slug": "nerdcave77",
     "userInterfaceStyle": "light",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "web": {
       "bundler": "metro",
       "favicon": "./assets/images/favicon.png",
