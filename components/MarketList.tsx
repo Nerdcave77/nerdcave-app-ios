@@ -25,6 +25,7 @@ import {
   itemFromSnapshot,
   loadTrackedProjects,
   projectKeyFromHeadline,
+  projectKeysMatch,
   snapshotFromItem,
   subscribeTrackedProjects,
   toggleTrackedProject,
@@ -189,8 +190,8 @@ export default function MarketList({ compact = false }: { compact?: boolean }) {
     load();
   }, [load]);
 
-  const trackedKeys = useMemo(
-    () => new Set(tracked.map((t) => t.key)),
+  const keyIsTracked = useCallback(
+    (k: string) => tracked.some((t) => projectKeysMatch(t.key, k)),
     [tracked],
   );
 
@@ -198,13 +199,13 @@ export default function MarketList({ compact = false }: { compact?: boolean }) {
     (item: MarketNews): TrackControl | undefined =>
       item.category === 'digital'
         ? {
-            tracking: trackedKeys.has(projectKeyFromHeadline(item.headline)),
+            tracking: keyIsTracked(projectKeyFromHeadline(item.headline)),
             onToggle: () => {
               void toggleTrackedProject(item);
             },
           }
         : undefined,
-    [trackedKeys],
+    [keyIsTracked],
   );
 
   const q = query.trim().toLowerCase();
@@ -237,7 +238,7 @@ export default function MarketList({ compact = false }: { compact?: boolean }) {
     const display = tracked.map((t) => {
       let newest: MarketNews | null = null;
       for (const item of items) {
-        if (projectKeyFromHeadline(item.headline) !== t.key) continue;
+        if (!projectKeysMatch(projectKeyFromHeadline(item.headline), t.key)) continue;
         if (
           !newest ||
           new Date(item.publishedAt).getTime() >
@@ -393,7 +394,7 @@ export default function MarketList({ compact = false }: { compact?: boolean }) {
             item={d.item}
             displayTitle={d.tracked.name}
             trackControl={{
-              tracking: trackedKeys.has(d.tracked.key),
+              tracking: keyIsTracked(d.tracked.key),
               onToggle: () => {
                 void toggleTrackedProject(d.item);
               },

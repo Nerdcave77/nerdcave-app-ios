@@ -45,6 +45,19 @@ export function projectKeyFromHeadline(headline: string): string {
     .replace(/(^-|-$)/g, '');
 }
 
+/**
+ * Do two project keys name the same project? Exact match, or one is a
+ * word-boundary prefix of the other. The prefix case heals legacy snapshots:
+ * a card tracked when headlines read "VeVe marketplace, all collectibles"
+ * (key veve-marketplace-all-collectibles) still refreshes from today's
+ * "VeVe - VeVe marketplace" items (key veve).
+ */
+export function projectKeysMatch(a: string, b: string): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.startsWith(b + '-') || b.startsWith(a + '-');
+}
+
 /** Snapshot a market item as a tracked project. */
 export function snapshotFromItem(item: MarketNews): TrackedProject {
   return {
@@ -134,8 +147,8 @@ async function storeTrackedProjects(list: TrackedProject[]): Promise<void> {
 /** Toggle tracking for the project named in this item's headline. */
 export async function toggleTrackedProject(item: MarketNews): Promise<void> {
   const key = projectKeyFromHeadline(item.headline);
-  if (cache.some((t) => t.key === key)) {
-    await storeTrackedProjects(cache.filter((t) => t.key !== key));
+  if (cache.some((t) => projectKeysMatch(t.key, key))) {
+    await storeTrackedProjects(cache.filter((t) => !projectKeysMatch(t.key, key)));
   } else {
     await storeTrackedProjects([...cache, snapshotFromItem(item)]);
   }
@@ -143,5 +156,5 @@ export async function toggleTrackedProject(item: MarketNews): Promise<void> {
 
 export function isTracked(item: MarketNews): boolean {
   const key = projectKeyFromHeadline(item.headline);
-  return cache.some((t) => t.key === key);
+  return cache.some((t) => projectKeysMatch(t.key, key));
 }
